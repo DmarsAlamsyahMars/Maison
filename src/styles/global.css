@@ -46,7 +46,6 @@ html, body {
   overscroll-behavior-y: none;
   
   /* 2. Camouflage: Matches your Hero Section color (Stone/Beige) */
-  /* This ensures that if it DOES slip, they see beige, not black void */
   background-color: #E7E5E4; 
 }
 
@@ -73,21 +72,6 @@ body {
   width: 100% !important;    
   height: auto !important;   
   overflow: visible !important; 
-}
-
-/* --- THE DIVINE NOISE TEXTURE --- */
-.bg-noise {
-  position: relative;
-}
-.bg-noise::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
-  opacity: 0.08; 
-  pointer-events: none;
-  mix-blend-mode: overlay; 
 }
 
 /* --- LUXURY SCROLLBAR CUSTOMIZATION --- */
@@ -220,4 +204,20 @@ html {
       drop-shadow(0px 3px 0px rgba(84, 58, 20, 0.8))
       drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.3));
   -webkit-text-stroke: 1px rgba(139, 110, 40, 0.3);
+}
+
+/* --- MOBILE PERFORMANCE OVERRIDES --- */
+/* This section forces the phone to work less hard */
+@media (max-width: 768px) {
+    /* 1. Cap the blur at 8px so the GPU doesn't overheat */
+    * {
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+    }
+
+    /* 2. Disable heavy text shadows and continuous animations on mobile */
+    .luxury-glow, .spotlight-gold {
+        text-shadow: none !important;
+        animation: none !important;
+    }
 }
