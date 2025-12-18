@@ -48,8 +48,6 @@ export default function MiniQuiz({ onBack }) {
   };
   
   const labelBaseClass = "transition-all duration-500 cursor-pointer uppercase tracking-[0.25em] text-[10px] origin-center";
-  
-  // Active State: Scale + Glow (No Bold to prevent jitter)
   const labelActiveClass = "text-[#FCF6BA] drop-shadow-[0_0_15px_rgba(252,246,186,0.9)] scale-125";
   const labelInactiveClass = "text-[#C5A059]/40 hover:text-[#C5A059] hover:drop-shadow-[0_0_5px_rgba(197,160,89,0.5)]";
 
@@ -73,7 +71,6 @@ export default function MiniQuiz({ onBack }) {
     const ctx = gsap.context(() => {
         const currentPanel = panelsRef.current[step];
         if (currentPanel) {
-            // FIX: Explicitly reset 'filter' and 'y' on the parent container.
             gsap.set(currentPanel, { display: 'flex', autoAlpha: 1, y: 0, filter: "blur(0px)" });
             
             const childElements = currentPanel.querySelectorAll('.animate-float');
@@ -143,22 +140,22 @@ export default function MiniQuiz({ onBack }) {
 
   if (step === 3 && recommendation && !isCalculating) {
     const data = fragranceData[recommendation];
-    // CHANGE: Passed 'onBack' down to the showcase
     return <FragranceShowcase data={data} onRetake={retakeQuiz} onBack={onBack} />;
   }
 
   return (
-    // FIX APPLIED HERE: 
-    // Changed 'w-full' to 'w-screen' to force centering relative to the Viewport (Glass), 
-    // ignoring the scrollbar width. This stops the text from jumping relative to the 
-    // absolute positioned Back Button.
     <div className="w-screen h-screen flex flex-col items-center justify-center relative overflow-hidden">
         
-        {/* LOADING SCREEN */}
+        {/* --- FIXED LOADING SCREEN --- */}
+        {/* 1. Removed 'bg-transparent backdrop-blur-sm' to remove the "overlay" feel */}
+        {/* 2. Added 'animate-[fadeIn_1s_ease-out]' so the spinner fades in gently */}
         {isCalculating && (
-            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-transparent backdrop-blur-sm">
-                <div className="flex flex-col items-center animate-pulse">
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center animate-[fadeIn_1s_ease-out]">
+                <div className="flex flex-col items-center">
                     <div className="w-20 h-20 border-t-2 border-b-2 border-[#FCF6BA] rounded-full animate-spin mb-8 shadow-[0_0_30px_rgba(252,246,186,0.2)]"></div>
+                    <span className="text-[#C5A059] text-[10px] tracking-[0.3em] uppercase animate-pulse">
+                        Analyzing Composition
+                    </span>
                 </div>
             </div>
         )}
@@ -207,11 +204,7 @@ export default function MiniQuiz({ onBack }) {
                             {/* --- SLIDER CONTAINER --- */}
                             <div className="animate-float w-full max-w-xl px-8 relative">
                                 <div className="relative w-full h-16 flex items-center justify-center">
-                                    
-                                    {/* 1. Base Track */}
                                     <div className="absolute w-full h-px bg-[#C5A059]/20"></div>
-
-                                    {/* 2. Active Beam (Light) */}
                                     <div 
                                         className="absolute h-[2px] shadow-[0_0_15px_rgba(252,246,186,0.6)]"
                                         style={{ 
@@ -222,7 +215,6 @@ export default function MiniQuiz({ onBack }) {
                                         }}
                                     ></div>
 
-                                    {/* 3. Beveled Circle Handle */}
                                     <div 
                                         className="absolute z-20 flex items-center justify-center" 
                                         style={{ 
@@ -234,7 +226,6 @@ export default function MiniQuiz({ onBack }) {
                                         <BeveledHandle />
                                     </div>
 
-                                    {/* 4. Invisible Range Input */}
                                     <input 
                                         type="range" 
                                         min={q.min} max={q.max} step="0.01" 
@@ -245,7 +236,6 @@ export default function MiniQuiz({ onBack }) {
                                         className="absolute w-full h-full opacity-0 cursor-pointer z-30" 
                                     />
 
-                                    {/* 5. Markers */}
                                     {[0, 50, 100].map((pos) => (
                                         <div 
                                             key={pos} 
@@ -255,7 +245,6 @@ export default function MiniQuiz({ onBack }) {
                                     ))}
                                 </div>
 
-                                {/* Labels */}
                                 <div className="flex justify-between mt-6">
                                     <span 
                                         className={`${labelBaseClass} ${Math.round(currentValue) === 1 ? labelActiveClass : labelInactiveClass}`} 
@@ -278,7 +267,6 @@ export default function MiniQuiz({ onBack }) {
                                 </div>
                             </div>
 
-                            {/* Nav Buttons */}
                             <div className="flex items-center justify-between mt-24 w-full max-w-2xl px-8">
                                 <div className="w-20">
                                     {step > 0 && (
@@ -299,7 +287,6 @@ export default function MiniQuiz({ onBack }) {
                                     </button>
                                 </div>
                             </div>
-
                         </div>
                     );
                 })}

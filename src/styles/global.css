@@ -209,10 +209,12 @@ html {
 /* --- MOBILE PERFORMANCE OVERRIDES --- */
 /* This section forces the phone to work less hard */
 @media (max-width: 768px) {
-    /* 1. Cap the blur at 8px so the GPU doesn't overheat */
-    * {
-        backdrop-filter: blur(8px) !important;
-        -webkit-backdrop-filter: blur(8px) !important;
+    /* 1. SAFE FIX: Disable glass blurs on mobile.
+       Instead of targeting everything (*), we only target classes that use blur. */
+    [class*="backdrop-blur"] {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background-color: rgba(6, 6, 6, 0.9); /* Fallback dark background for readability */
     }
 
     /* 2. Disable heavy text shadows and continuous animations on mobile */
