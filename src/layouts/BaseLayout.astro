@@ -1,0 +1,192 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from 'astro:transitions'; 
+import BackgroundManager from "../components/BackgroundManager";
+
+export interface Props {
+	title: string;
+	description?: string;
+    showInitialLoader?: boolean;
+}
+
+const { 
+    title, 
+    description = "A modern landing page built with Astro, React, and Tailwind CSS",
+    showInitialLoader = false 
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+		
+        <ClientRouter />
+
+        {/* 1. FORCE MANUAL SCROLL RESTORATION */}
+        <script is:inline>
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
+        </script>
+
+		<style>
+			body, main { background-color: transparent; }
+			canvas { background-color: transparent; }
+			body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+            
+            /* LOADER CSS */
+            #initial-loader { 
+                position: fixed; 
+                inset: 0; 
+                z-index: 9999; 
+                background-color: #ffffff; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                transition: opacity 0.8s ease-out, visibility 0.8s; 
+            }
+            .loader-text { 
+                font-family: 'Inter', sans-serif; 
+                font-size: 0.875rem; 
+                letter-spacing: 0.1em; 
+                color: #57534e; 
+                animation: pulse 2s infinite; 
+            }
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+            .loader-hidden { opacity: 0; visibility: hidden; }
+            .loader-force-hide { display: none !important; }
+
+            /* LENIS & SCROLLBAR CSS */
+            html.lenis, html.lenis body { height: auto; }
+            .lenis.lenis-smooth { scroll-behavior: auto !important; }
+            .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+            .lenis.lenis-stopped { overflow: hidden; }
+            .lenis.lenis-scrolling iframe { pointer-events: none; }
+            ::-webkit-scrollbar { width: 6px; background: transparent; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background-color: #d6d3d1; border-radius: 20px; border: 2px solid #FDFBF7; transition: background-color 0.3s ease; }
+            ::-webkit-scrollbar-thumb:hover { background-color: #C5A059; }
+            html { scrollbar-width: thin; scrollbar-color: #d6d3d1 transparent; }
+		</style>
+	</head>
+	<body class="bg-[#FDFBF7]"> 
+        {/* Loader is ALWAYS rendered initially to cover the jump */}
+        <div id="initial-loader">
+            <span class="loader-text">Setting things up for you...</span>
+        </div>
+
+        <div transition:persist>
+            <BackgroundManager client:load />
+        </div>
+
+		<main class="min-h-screen text-stone-900 relative z-10">
+			<slot />
+		</main>
+
+        <script>
+            import Lenis from 'lenis'
+            import { gsap } from 'gsap'
+            import { ScrollTrigger } from 'gsap/ScrollTrigger'
+            gsap.registerPlugin(ScrollTrigger);
+            
+            let lenis: any;
+
+            // --- SMOOTH SCROLL INIT ---
+            function initSmoothScroll() {
+                if (lenis) lenis.destroy();
+                lenis = new Lenis({
+                    duration: 1.5,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+                    orientation: 'vertical',
+                    gestureOrientation: 'vertical',
+                    smoothWheel: true,
+                    wheelMultiplier: 1,
+                    touchMultiplier: 2,
+                });
+                lenis.on('scroll', ScrollTrigger.update);
+                gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+                gsap.ticker.lagSmoothing(0);
+            }
+
+            // --- EXECUTE JUMP & REVEAL ---
+            function performJumpAndReveal() {
+                // 1. PERFORM THE JUMP
+                if (window.location.hash && lenis) {
+                    ScrollTrigger.refresh(); // Ensure layout is calculated
+                    lenis.scrollTo(window.location.hash, { 
+                        immediate: true, 
+                        force: true 
+                    });
+                }
+
+                // 2. REVEAL THE PAGE (Lift the Curtain)
+                // We perform this slightly after the jump command to ensure the browser has painted the new position
+                requestAnimationFrame(() => {
+                    const loader = document.getElementById('initial-loader');
+                    if (loader && !loader.classList.contains('loader-hidden')) {
+                        loader.classList.add('loader-hidden');
+                        sessionStorage.setItem('hasSeenLoader', 'true');
+                        setTimeout(() => { loader.style.display = 'none'; }, 800);
+                    }
+                });
+            }
+
+            // --- MAIN LOGIC ---
+            function setupPage() {
+                initSmoothScroll();
+
+                const loader = document.getElementById('initial-loader');
+                // Ensure loader is visible (display: flex) at start of logic to cover any glitches
+                if (loader) loader.style.display = 'flex';
+
+                const isHomePage = window.location.pathname === '/' || window.location.pathname === '';
+                const hasHash = !!window.location.hash;
+                const hasSeenLoader = sessionStorage.getItem('hasSeenLoader');
+
+                // SCENARIO 1: We have a specific destination (e.g. #discovery-hub)
+                // We MUST keep the loader visible until we jump, regardless of history.
+                if (hasHash) {
+                     // If on Homepage, we still need to wait for Hero to pin (expand) before jumping
+                    if (isHomePage) {
+                        window.addEventListener('hero-ready', performJumpAndReveal, { once: true });
+                        setTimeout(performJumpAndReveal, 4000); // Safety fallback
+                    } else {
+                        // Not homepage? Jump immediately.
+                        performJumpAndReveal();
+                    }
+                } 
+                // SCENARIO 2: No specific destination (Top of page)
+                else {
+                    // If user has seen loader, we can hide it immediately
+                    if (hasSeenLoader && loader) {
+                        loader.style.display = 'none';
+                    } 
+                    // Otherwise wait for hero/load normally
+                    else if (isHomePage) {
+                        window.addEventListener('hero-ready', performJumpAndReveal, { once: true });
+                        setTimeout(performJumpAndReveal, 4000);
+                    } else {
+                        performJumpAndReveal();
+                    }
+                }
+            }
+
+            // Run on initial load and view transitions
+            setupPage();
+            document.addEventListener('astro:after-swap', setupPage);
+
+            document.addEventListener('astro:before-swap', () => {
+                if (lenis) lenis.destroy();
+            });
+        </script>
+	</body>
+</html>

@@ -1,0 +1,12 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { AuroraBackground } from "../components/ui/aurora-background";
+import ProductOverview from "../components/ProductOverview.jsx";
+---
+
+<BaseLayout title="Collection | Maison des Rêves" showInitialLoader={false}>
+    {/* We force the background to be visible immediately */}
+    <AuroraBackground client:load className="!block h-auto min-h-screen w-full">
+        <ProductOverview client:load />
+    </AuroraBackground>
+</BaseLayout>

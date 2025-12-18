@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import QuizPageManager from "../components/QuizPageManager.jsx";
+---
+
+<BaseLayout title="Scent Discovery | Maison des Rêves" showInitialLoader={false}>
+  
+  <div 
+    id="static-curtain" 
+    class="fixed inset-0 z-[100] bg-[#0c0a09] pointer-events-none"
+  ></div>
+
+  <QuizPageManager client:only="react" />
+
+</BaseLayout>

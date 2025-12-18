@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --background: 0 0% 6%; 
+  --foreground: 210 40% 98%; 
+  --card: 0 0% 6%;
+  --card-foreground: 210 40% 98%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%; 
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --animate-aurora: aurora 60s linear infinite;
+  @keyframes aurora {
+    from { background-position: 50% 50%, 50% 50%; }
+    to { background-position: 350% 50%, 350% 50%; }
+  }
+}
+
+/* --- STRICT SCROLL RESET (THE FIX) --- */
+html {
+  /* 1. Force the ONE true scrollbar track to always exist. */
+  /* This prevents the "jagger" layout shift. */
+  overflow-y: scroll; 
+  
+  /* 2. Kill horizontal scrollbars caused by content overflow. */
+  overflow-x: hidden;
+  
+  /* 3. Ensure HTML takes full height but doesn't lock it. */
+  height: 100%;
+}
+
+body {
+  /* 4. FORCE body to NEVER scroll independently. */
+  /* This kills the "second scrollbar" appearing inside the page. */
+  overflow: visible !important; 
+  overflow-x: hidden !important;
+  
+  /* 5. Allow body to grow naturally with content. */
+  height: auto !important; 
+  min-height: 100%;
+  
+  /* 6. Standard resets */
+  width: 100%; 
+  position: relative;
+  background-color: #FDFBF7; 
+}
+
+/* 7. Safety net for React/Next.js/Astro root containers */
+#root, #__next, main {
+  isolation: isolate;
+  width: 100% !important;    /* Forces container to fit inside scrollbar width */
+  height: auto !important;   /* Prevents height locking */
+  overflow: visible !important; /* Prevents nested scrolling */
+}
+
+/* --- THE DIVINE NOISE TEXTURE --- */
+.bg-noise {
+  position: relative;
+}
+.bg-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.08; 
+  pointer-events: none;
+  mix-blend-mode: overlay; 
+}
+
+/* --- LUXURY SCROLLBAR CUSTOMIZATION --- */
+::-webkit-scrollbar {
+    width: 6px; 
+    background: transparent;
+}
+::-webkit-scrollbar-track {
+    background: transparent; 
+    margin-block: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #d6d3d1;
+    border-radius: 20px;
+    border: 2px solid transparent; 
+    background-clip: content-box; 
+    transition: background-color 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #C5A059;
+}
+/* Firefox Fallback */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #d6d3d1 transparent;
+}
+
+/* --- LUXURY SLIDER STYLES --- */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.slider::-webkit-slider-track {
+  background: #e5e7eb; 
+  height: 2px;
+  border-radius: 6px;
+  border: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #d6d3d1;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+.slider::-webkit-slider-thumb:hover {
+  border-color: #fbbf24;
+  transform: scale(1.1);
+  box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.2);
+}
+.slider::-moz-range-track {
+  background: #e5e7eb;
+  height: 2px;
+  border-radius: 6px;
+  border: none;
+}
+.slider::-moz-range-thumb {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #d6d3d1;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+.slider::-moz-range-thumb:hover {
+  border-color: #fbbf24;
+  transform: scale(1.1);
+}
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.animate-shine {
+  background-size: 200% auto;
+  animation: shine 4s linear infinite;
+}
+
+/* LUXURY GLOW */
+.luxury-glow {
+  text-shadow: 0 0 40px rgba(197, 160, 89, 0.3), 0 0 10px rgba(197, 160, 89, 0.1);
+}
+.spotlight-gold {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: 
+      radial-gradient(
+          circle 100px at var(--x, 50%) var(--y, 50%), 
+          #fffbeb 0%,  
+          rgba(255, 255, 255, 0.2) 20%, 
+          transparent 50%
+      ),
+      linear-gradient(
+          to right, 
+          #b45309, 
+          #fde68a, 
+          #b45309 
+      );
+  background-size: auto, 200% auto; 
+  animation: shine 4s linear infinite;
+  transition: text-shadow 0.3s ease;
+}
+.spotlight-gold:hover {
+  text-shadow: 0 0 30px rgba(253, 230, 138, 0.4); 
+  cursor: default; 
+}
+.ancient-gold-text {
+  background: linear-gradient(
+      to bottom,
+      #fbf5b7 0%,    
+      #bf953f 40%,   
+      #b38728 50%,   
+      #fbf5b7 55%,   
+      #aa771c 100%   
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: 
+      drop-shadow(0px 1px 0px rgba(255, 255, 255, 0.5))
+      drop-shadow(0px 3px 0px rgba(84, 58, 20, 0.8))
+      drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.3));
+  -webkit-text-stroke: 1px rgba(139, 110, 40, 0.3);
+}

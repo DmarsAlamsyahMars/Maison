@@ -1,16 +1,15 @@
 ---
-
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroSection from "../components/HeroSection.jsx";
+import DiscoveryHub from "../components/DiscoveryHub.jsx"; 
+import { AuroraBackground } from "../components/ui/aurora-background";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Maison" showInitialLoader={true}>
+    
+    <AuroraBackground client:load className="!block h-auto w-full">
+		<HeroSection client:load />
+		<DiscoveryHub client:load />
+	</AuroraBackground>
+
+</BaseLayout>
