@@ -21,9 +21,9 @@ const steps = [
   }
 ];
 
-// 1. Beveled Gold Circle Handle
+// --- CHANGE 1: Bigger Handle for Mobile (w-8 h-8) ---
 const BeveledHandle = () => (
-  <div className="w-6 h-6 rounded-full bg-[#C5A059] relative shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
+  <div className="w-8 h-8 md:w-6 md:h-6 rounded-full bg-[#C5A059] relative shadow-[0_4px_10px_rgba(0,0,0,0.3)]">
     <div className="absolute inset-0 rounded-full shadow-[inset_1px_1px_3px_rgba(255,255,255,0.7)]"></div>
     <div className="absolute inset-0 rounded-full shadow-[inset_-2px_-2px_4px_rgba(0,0,0,0.2)]"></div>
   </div>
@@ -41,7 +41,6 @@ export default function MiniQuiz({ onBack }) {
   const panelsRef = useRef([]);
   panelsRef.current = [];
 
-  // Styles
   const bevelTextStyle = {
     color: '#FCF6BA', 
     textShadow: '0 0 20px rgba(197,160,89,0.3), 0 0 5px rgba(252,246,186,0.5)'
@@ -88,7 +87,6 @@ export default function MiniQuiz({ onBack }) {
     return () => ctx.revert();
   }, [step, isCalculating]);
 
-  // HANDLE SLIDER LOGIC
   const handleSliderChange = (id, value) => {
     setAnswers(prev => ({ ...prev, [id]: value }));
   };
@@ -146,9 +144,6 @@ export default function MiniQuiz({ onBack }) {
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center relative overflow-hidden">
         
-        {/* --- FIXED LOADING SCREEN --- */}
-        {/* 1. Removed 'bg-transparent backdrop-blur-sm' to remove the "overlay" feel */}
-        {/* 2. Added 'animate-[fadeIn_1s_ease-out]' so the spinner fades in gently */}
         {isCalculating && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center animate-[fadeIn_1s_ease-out]">
                 <div className="flex flex-col items-center">
@@ -160,7 +155,6 @@ export default function MiniQuiz({ onBack }) {
             </div>
         )}
 
-        {/* BACK BUTTON */}
         {!isCalculating && step < 3 && (
             <div className="absolute top-10 left-6 z-20">
                 <button 
@@ -173,12 +167,10 @@ export default function MiniQuiz({ onBack }) {
             </div>
         )}
 
-        {/* QUESTIONS */}
         {!isCalculating && (
             <div ref={wrapperRef} className="relative w-full max-w-5xl min-h-[600px] flex items-center justify-center pointer-events-none">
                 {steps.map((q, i) => {
                     const currentValue = answers[q.id] || 2;
-                    
                     const percent = ((currentValue - 1) / 2) * 100;
                     const transitionStyle = isDragging 
                         ? 'none' 
@@ -194,14 +186,14 @@ export default function MiniQuiz({ onBack }) {
                                 <span className="block text-xl font-serif text-[#C5A059]/40 tracking-[0.2em]">0{i + 1}</span>
                             </div>
 
-                            <h3 className="animate-float text-4xl md:text-6xl font-serif font-medium mb-6 leading-tight px-4 tracking-wide" style={bevelTextStyle}>
+                            {/* --- CHANGE 2: Margins to prevent edge touching & Force 2-liner --- */}
+                            <h3 className="animate-float text-4xl md:text-6xl font-serif font-medium mb-6 leading-tight px-8 md:px-4 tracking-wide max-w-[80%] mx-auto" style={bevelTextStyle}>
                                 {q.title}
                             </h3>
-                            <p className="animate-float text-[#C5A059] text-xs md:text-sm font-light tracking-[0.2em] uppercase mb-24 opacity-80">
+                            <p className="animate-float text-[#C5A059] text-xs md:text-sm font-light tracking-[0.2em] uppercase mb-24 opacity-80 max-w-[70%] mx-auto leading-relaxed">
                                 {q.subtitle}
                             </p>
                             
-                            {/* --- SLIDER CONTAINER --- */}
                             <div className="animate-float w-full max-w-xl px-8 relative">
                                 <div className="relative w-full h-16 flex items-center justify-center">
                                     <div className="absolute w-full h-px bg-[#C5A059]/20"></div>
@@ -245,7 +237,8 @@ export default function MiniQuiz({ onBack }) {
                                     ))}
                                 </div>
 
-                                <div className="flex justify-between mt-6">
+                                {/* --- CHANGE 3: Padding for Labels --- */}
+                                <div className="flex justify-between mt-6 px-2 md:px-0">
                                     <span 
                                         className={`${labelBaseClass} ${Math.round(currentValue) === 1 ? labelActiveClass : labelInactiveClass}`} 
                                         onClick={() => handleSliderChange(q.id, 1)}

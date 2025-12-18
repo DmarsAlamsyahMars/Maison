@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { navigate } from 'astro:transitions/client'; // Import navigation
+import { navigate } from 'astro:transitions/client';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +10,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-        // --- 1. HERO ANIMATIONS ---
         gsap.from(".hero-text", {
             y: 50, opacity: 0, duration: 1.5, stagger: 0.2, ease: "power3.out", delay: 0.2
         });
@@ -22,7 +21,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
         gsap.to(".hero-bottle", { y: -15, duration: 3, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 2.2 });
         gsap.to(".hero-aura", { rotation: 360, duration: 20, ease: "none", repeat: -1 });
 
-        // --- 2. MAGAZINE SECTIONS ---
         const sections = gsap.utils.toArray('.magazine-section');
         sections.forEach((section) => {
             gsap.from(section.children, {
@@ -39,7 +37,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
     return () => ctx.revert();
   }, [data]);
 
-  // Image Placeholder
   const ImagePlaceholder = ({ label }) => (
     <div className="w-full h-full border border-[#C5A059]/30 bg-[#C5A059]/5 backdrop-blur-sm flex items-center justify-center relative overflow-hidden group">
         <div className="absolute inset-3 border border-[#C5A059]/10 group-hover:inset-5 transition-all duration-700"></div>
@@ -53,7 +50,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
   return (
     <div ref={containerRef} className="w-full min-h-screen text-[#FDFBF7] pb-32 relative z-50">
       
-      {/* BACK BUTTON */}
       <div className="absolute top-10 left-6 z-50">
           <button onClick={onBack} className="group flex items-center gap-4 text-[10px] font-medium tracking-[0.4em] uppercase text-[#9E8043] hover:text-[#FCF6BA] transition-colors duration-500">
               <span className="text-lg font-light group-hover:-translate-x-2 transition-transform duration-500">←</span>
@@ -71,7 +67,9 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
          </div>
 
          <div className="relative w-80 h-[500px] md:w-[300px] md:h-[400px] mb-8 md:mb-0 md:-mt-6 flex items-center justify-center perspective-1000">
-             <div className="hero-aura absolute inset-0 bg-gradient-radial from-[#C5A059]/40 via-transparent to-transparent opacity-0 blur-3xl scale-150 z-0"></div>
+             {/* --- CHANGE: Reduced scale on mobile (scale-110) to prevent edge cutting --- */}
+             <div className="hero-aura absolute inset-0 bg-gradient-radial from-[#C5A059]/40 via-transparent to-transparent opacity-0 blur-3xl scale-110 md:scale-150 z-0"></div>
+             
              <div className="hero-bottle relative z-10 w-full h-full flex items-center justify-center">
                  {data.resultImage ? (
                      <img src={data.resultImage} alt={data.name} className="w-full h-full object-contain drop-shadow-[0_0_40px_rgba(197,160,89,0.4)]" />
@@ -91,11 +89,8 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
          </div>
       </div>
 
-
-      {/* --- 2. MAGAZINE SECTIONS --- */}
       <div className="w-full max-w-5xl mx-auto px-8 flex flex-col gap-32 mt-12">
          
-         {/* ROW 1: THE NARRATIVE (Video 16:9) */}
          <div className="magazine-section grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div className="order-2 md:order-1 text-center md:text-left">
                 <span className="block text-[#C5A059] text-[9px] tracking-[0.3em] uppercase mb-4">The Narrative</span>
@@ -120,7 +115,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
             </div>
          </div>
 
-         {/* ROW 2: NOTES (Static Image - NO HOVER) */}
          <div className="magazine-section grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="h-[300px] md:h-[350px] w-full">
                  {data.noteImage ? (
@@ -148,8 +142,6 @@ export default function FragranceShowcase({ data, onRetake, onBack }) {
 
       </div>
 
-
-      {/* --- 3. FOOTER --- */}
       <div className="w-full flex flex-col items-center justify-center mt-32 gap-6">
             <button 
                 onClick={() => navigate(`/collection?product=${data.id}`)}
