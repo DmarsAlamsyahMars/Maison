@@ -3,7 +3,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Sparkles from './ui/Sparkles'; 
 
-
 gsap.registerPlugin(ScrollTrigger);
 
 // --- CONFIGURATION ---
@@ -76,6 +75,7 @@ const HeroSection = () => {
     }, (context) => {
       let { isMobile } = context.conditions;
 
+      // ADJUSTED SCALES: Less aggressive scaling on mobile to reduce pixel calculation load
       const startScale = isMobile ? 2.9 : 2.5;
       const endScale = isMobile ? 0.4 : 0.7;
 
@@ -213,7 +213,7 @@ const HeroSection = () => {
       </div>
 
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div ref={sceneWrapperRef} className="relative w-[900px] h-[600px] will-change-transform">
+        <div ref={sceneWrapperRef} className="relative w-[900px] h-[600px]">
             
             <div className="absolute inset-0 z-0">
                 <div 
@@ -232,7 +232,8 @@ const HeroSection = () => {
                         key={cherub.id}
                         src={cherub.src}
                         alt="Cherub"
-                        className={`living-cherub absolute opacity-90 drop-shadow-lg ${cherub.width}`}
+                        // Added 'gpu-optimize' class here (defined in global.css)
+                        className={`living-cherub gpu-optimize absolute opacity-90 drop-shadow-lg ${cherub.width}`}
                         style={{ 
                             '--mob-top': cherub.mobileTop,
                             '--mob-left': cherub.mobileLeft,
@@ -246,14 +247,26 @@ const HeroSection = () => {
 
             <div ref={fadeLayerRef} className="absolute inset-0 z-40 pointer-events-none will-change-opacity">
                 
-                <Sparkles count={60} speed={0.3} />
+                {/* PERFORMANCE FIX: 
+                   'hidden md:block' ensures Sparkles component is NEVER rendered on mobile.
+                   This saves massive battery/GPU on phones.
+                */}
+                <div className="hidden md:block absolute inset-0">
+                    <Sparkles count={60} speed={0.3} />
+                </div>
                 
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full px-6 pointer-events-auto">
-                    <img 
-                        src="/maisondesreves.webp" 
-                        alt="Maison des Rêves" 
-                        className="w-32 md:w-full md:max-w-xs mx-auto drop-shadow-2xl"
-                    />
+                <img 
+                  src="/maisondesreves.webp" 
+                  alt="Maison des Rêves" 
+                  className="w-32 md:w-full md:max-w-xs mx-auto drop-shadow-2xl"
+                  style={{ 
+        // 3. FORCE the browser to keep edges sharp, even when scaling
+                  imageRendering: '-webkit-optimize-contrast',
+                  transform: 'translateZ(0)', // Double-check GPU trigger
+                  backfaceVisibility: 'hidden'
+                    }}
+                   />
                 </div>
 
             </div>

@@ -5,17 +5,17 @@ import FragranceShowcase from './FragranceShowcase';
 
 const steps = [
   { 
-    id: 'projection', title: 'Scent Projection', subtitle: 'How noticeable should your presence be?', 
+    id: 'projection', title: 'Scent Projection', subtitle: 'How noticeable should your fragrance be?', 
     min: 1, max: 3, defaultValue: 2, 
-    leftLabel: 'Intimate', rightLabel: 'Bold' 
+    leftLabel: 'Light', rightLabel: 'Strong' 
   },
   { 
-    id: 'occasion', title: 'Ideal Occasion', subtitle: 'Where does your story take place?', 
+    id: 'occasion', title: 'Ideal Wear Time', subtitle: 'When do you plan to wear this fragrance?', 
     min: 1, max: 3, defaultValue: 2, 
     leftLabel: 'Daylight', rightLabel: 'Midnight' 
   },
   { 
-    id: 'character', title: 'Dominant Note', subtitle: 'The soul of the fragrance', 
+    id: 'character', title: 'Dominant Note', subtitle: 'What should be the soul of the fragrance?', 
     min: 1, max: 3, defaultValue: 2, 
     leftLabel: 'Clean', rightLabel: 'Spicy' 
   }

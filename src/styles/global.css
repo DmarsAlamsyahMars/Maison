@@ -32,41 +32,47 @@
   }
 }
 
+/* --- MOBILE PERFORMANCE OPTIMIZATION --- */
+.gpu-optimize {
+  /* Forces the element to its own GPU layer. Fixes 'stutter' on moving images */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 /* --- STRICT SCROLL RESET (THE FIX) --- */
+html, body {
+  /* 1. Stops the rubber-band elastic scroll on iOS */
+  overscroll-behavior-y: none;
+  
+  /* 2. Camouflage: Matches your Hero Section color (Stone/Beige) */
+  /* This ensures that if it DOES slip, they see beige, not black void */
+  background-color: #E7E5E4; 
+}
+
 html {
-  /* 1. Force the ONE true scrollbar track to always exist. */
-  /* This prevents the "jagger" layout shift. */
+  /* 3. Force the ONE true scrollbar track to always exist. */
   overflow-y: scroll; 
-  
-  /* 2. Kill horizontal scrollbars caused by content overflow. */
   overflow-x: hidden;
-  
-  /* 3. Ensure HTML takes full height but doesn't lock it. */
   height: 100%;
 }
 
 body {
   /* 4. FORCE body to NEVER scroll independently. */
-  /* This kills the "second scrollbar" appearing inside the page. */
   overflow: visible !important; 
   overflow-x: hidden !important;
-  
-  /* 5. Allow body to grow naturally with content. */
   height: auto !important; 
   min-height: 100%;
-  
-  /* 6. Standard resets */
   width: 100%; 
   position: relative;
-  background-color: #FDFBF7; 
 }
 
-/* 7. Safety net for React/Next.js/Astro root containers */
+/* 5. Safety net for React/Next.js/Astro root containers */
 #root, #__next, main {
   isolation: isolate;
-  width: 100% !important;    /* Forces container to fit inside scrollbar width */
-  height: auto !important;   /* Prevents height locking */
-  overflow: visible !important; /* Prevents nested scrolling */
+  width: 100% !important;    
+  height: auto !important;   
+  overflow: visible !important; 
 }
 
 /* --- THE DIVINE NOISE TEXTURE --- */

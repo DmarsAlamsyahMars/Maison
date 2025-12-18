@@ -22,7 +22,9 @@ const {
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="theme-color" content="#E7E5E4" />
+        
+		<link rel="icon" type="image/svg+xml" href="/favicon.webp" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,21 +47,21 @@ const {
             
             /* LOADER CSS */
             #initial-loader { 
-                position: fixed; 
+                position: fixed;
                 inset: 0; 
                 z-index: 9999; 
                 background-color: #ffffff; 
                 display: flex; 
                 align-items: center; 
                 justify-content: center; 
-                transition: opacity 0.8s ease-out, visibility 0.8s; 
+                transition: opacity 0.8s ease-out, visibility 0.8s;
             }
             .loader-text { 
-                font-family: 'Inter', sans-serif; 
+                font-family: 'Inter', sans-serif;
                 font-size: 0.875rem; 
                 letter-spacing: 0.1em; 
                 color: #57534e; 
-                animation: pulse 2s infinite; 
+                animation: pulse 2s infinite;
             }
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
             .loader-hidden { opacity: 0; visibility: hidden; }
@@ -97,12 +99,13 @@ const {
             import { gsap } from 'gsap'
             import { ScrollTrigger } from 'gsap/ScrollTrigger'
             gsap.registerPlugin(ScrollTrigger);
-            
+
             let lenis: any;
 
             // --- SMOOTH SCROLL INIT ---
             function initSmoothScroll() {
                 if (lenis) lenis.destroy();
+                
                 lenis = new Lenis({
                     duration: 1.5,
                     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
@@ -112,6 +115,7 @@ const {
                     wheelMultiplier: 1,
                     touchMultiplier: 2,
                 });
+
                 lenis.on('scroll', ScrollTrigger.update);
                 gsap.ticker.add((time) => { lenis.raf(time * 1000); });
                 gsap.ticker.lagSmoothing(0);
@@ -121,7 +125,8 @@ const {
             function performJumpAndReveal() {
                 // 1. PERFORM THE JUMP
                 if (window.location.hash && lenis) {
-                    ScrollTrigger.refresh(); // Ensure layout is calculated
+                    ScrollTrigger.refresh();
+                    // Ensure layout is calculated
                     lenis.scrollTo(window.location.hash, { 
                         immediate: true, 
                         force: true 
@@ -129,7 +134,6 @@ const {
                 }
 
                 // 2. REVEAL THE PAGE (Lift the Curtain)
-                // We perform this slightly after the jump command to ensure the browser has painted the new position
                 requestAnimationFrame(() => {
                     const loader = document.getElementById('initial-loader');
                     if (loader && !loader.classList.contains('loader-hidden')) {
@@ -153,25 +157,19 @@ const {
                 const hasSeenLoader = sessionStorage.getItem('hasSeenLoader');
 
                 // SCENARIO 1: We have a specific destination (e.g. #discovery-hub)
-                // We MUST keep the loader visible until we jump, regardless of history.
                 if (hasHash) {
-                     // If on Homepage, we still need to wait for Hero to pin (expand) before jumping
                     if (isHomePage) {
                         window.addEventListener('hero-ready', performJumpAndReveal, { once: true });
                         setTimeout(performJumpAndReveal, 4000); // Safety fallback
                     } else {
-                        // Not homepage? Jump immediately.
                         performJumpAndReveal();
                     }
                 } 
                 // SCENARIO 2: No specific destination (Top of page)
                 else {
-                    // If user has seen loader, we can hide it immediately
                     if (hasSeenLoader && loader) {
                         loader.style.display = 'none';
-                    } 
-                    // Otherwise wait for hero/load normally
-                    else if (isHomePage) {
+                    } else if (isHomePage) {
                         window.addEventListener('hero-ready', performJumpAndReveal, { once: true });
                         setTimeout(performJumpAndReveal, 4000);
                     } else {
