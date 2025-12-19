@@ -214,7 +214,6 @@ html {
     [class*="backdrop-blur"] {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
-        background-color: rgba(6, 6, 6, 0.9); /* Fallback dark background for readability */
     }
 
     /* 2. Disable heavy text shadows and continuous animations on mobile */

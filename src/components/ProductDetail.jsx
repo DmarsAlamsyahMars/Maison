@@ -42,7 +42,9 @@ export default function ProductDetail({ product, onBack }) {
             {displayGallery.map((imgSrc, i) => {
                 const isFirstItemWithHover = i === 0 && product.hoverImage;
                 return (
-                    <div key={i} className="relative w-full h-full bg-[#FDFBF7]/40 backdrop-blur-sm border border-[#C5A059]/20 overflow-hidden group">
+                    <div key={i} className="relative w-full h-full bg-[#FDFBF7]/40 md:backdrop-blur-sm border border-[#C5A059]/20 overflow-hidden group">
+                        {/* ^^^ FIXED: added 'md:' prefix to backdrop-blur-sm */}
+                        
                         {isFirstItemWithHover ? (
                             <>
                                 <img src={imgSrc} alt={`${product.name} base`} className="absolute inset-0 w-full h-full object-cover" />
@@ -126,31 +128,18 @@ export default function ProductDetail({ product, onBack }) {
                 <button 
                     className="
                         group flex-1 py-4 
-                        /* MOBILE DEFAULT: Grey background, Stone text */
                         bg-[#e5e5e5] text-[#78716c]
-                        
-                        /* DESKTOP (md): Black background, White text, then Hover Grey */
                         md:bg-[#1c1917] md:text-[#FDFBF7] 
                         md:hover:bg-[#e5e5e5] md:hover:text-[#78716c]
-                        
                         uppercase tracking-[0.2em] text-xs shadow-lg 
                         cursor-not-allowed relative overflow-hidden transition-colors duration-300
                     "
                     onClick={(e) => e.preventDefault()}
                 >
-                    {/* "PURCHASE" Text: 
-                        - Hidden on Mobile 
-                        - Visible on Desktop 
-                        - Fades out on Desktop Hover 
-                    */}
                     <span className="hidden md:block md:opacity-100 md:group-hover:opacity-0 transition-opacity duration-300 ease-in-out">
                         Purchase
                     </span>
                     
-                    {/* "UNAVAILABLE" Text:
-                        - Visible & Relative on Mobile (so button grows to fit text)
-                        - Invisible & Absolute on Desktop (until hover)
-                    */}
                     <span className="
                         block relative
                         md:absolute md:inset-0 md:flex md:items-center md:justify-center 
