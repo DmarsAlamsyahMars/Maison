@@ -79,7 +79,6 @@ const HeroSection = () => {
       const endScale = isMobile ? 0.4 : 0.7;
 
       // 1. SETUP INITIAL SCENE
-      // We force3D to true to engage the GPU compositor immediately
       gsap.set(sceneWrapperRef.current, { 
         scale: startScale, 
         transformOrigin: "center center", 
@@ -96,24 +95,25 @@ const HeroSection = () => {
           gsap.set(rightTextRef.current, { x: 50, yPercent: -50 });
       }
 
-      // 2. ANIMATE CHERUBS (Directly via GSAP, no CSS Vars)
+      // 2. ANIMATE CHERUBS (Capture tweens to control them later)
       const cherubs = cherubLayerRef.current.children;
-      
+      const floatTweens = []; // Store the tweens here!
+
       Array.from(cherubs).forEach((cherub, i) => {
         const config = cherubConfig[i];
         
-        // Set Initial Position based on Responsive Config
+        // Initial Position
         gsap.set(cherub, {
             top: isMobile ? config.mobileTop : config.top,
             left: isMobile ? config.mobileLeft : config.left,
             x: 0,
             y: 0,
             rotation: 0,
-            force3D: true // Hardware acceleration
+            force3D: true
         });
 
-        // The Floating Animation
-        gsap.to(cherub, {
+        // The Floating Animation (stored in variable)
+        const floatTween = gsap.to(cherub, {
             y: config.floatY,
             x: config.floatX,
             rotation: config.rotate,
@@ -123,6 +123,8 @@ const HeroSection = () => {
             repeat: -1,
             delay: config.delay
         });
+        
+        floatTweens.push(floatTween);
       });
 
       // 3. SCROLL TIMELINE
@@ -131,20 +133,24 @@ const HeroSection = () => {
           trigger: containerRef.current,
           start: "top top",
           end: "+=300%", 
-          scrub: 0.5, // Adds a 0.5s lag to smooth out scroll jitter
+          scrub: 0.5,
           pin: true,
-          // anticipatePin: 1 // Removed as it sometimes causes jitter on simple pins
         }
       });
 
       tl.addLabel("start");
+      
+      // Scale down the scene
       tl.to(sceneWrapperRef.current, { scale: endScale, duration: 2, ease: "power1.inOut" }, "start");
+      
+      // Fade out the sparkles
       tl.to(fadeLayerRef.current, { opacity: 0, duration: 1.5, ease: "power1.in" }, "start");
       
-      // We removed the 'intensity' animation because scaling down the container 
-      // naturally dampens the movement visually, saving calculation cost.
+      // NEW: Slowly freeze the cherubs as the sparkles fade
+      // We animate the 'timeScale' of the floatTweens from 1 (moving) to 0 (stopped)
+      tl.to(floatTweens, { timeScale: 0, duration: 1.5, ease: "power1.in" }, "start");
 
-      // ANIMATE TEXT IN
+      // Animate Text In
       tl.to([leftTextRef.current, rightTextRef.current], { 
           autoAlpha: 1, 
           x: 0, 
@@ -208,7 +214,6 @@ const HeroSection = () => {
       </div>
 
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        {/* Added will-change-transform to hint the browser to promote this layer */}
         <div ref={sceneWrapperRef} className="relative w-[900px] h-[600px] will-change-transform">
             
             <div className="absolute inset-0 z-0">
@@ -229,11 +234,7 @@ const HeroSection = () => {
                         src={cherub.src}
                         alt="Cherub"
                         className={`absolute opacity-90 drop-shadow-lg ${cherub.width}`}
-                        // Note: top/left are now handled purely by GSAP in the useEffect
-                        style={{ 
-                            filter: 'contrast(0.9) sepia(0.2)',
-                            // Removed CSS Variables for performance
-                        }}
+                        style={{ filter: 'contrast(0.9) sepia(0.2)' }}
                     />
                 ))}
             </div>
@@ -249,7 +250,6 @@ const HeroSection = () => {
                   alt="Maison des Rêves" 
                   className="w-32 md:w-full md:max-w-xs mx-auto drop-shadow-2xl"
                   style={{ 
-                      imageRendering: '-webkit-optimize-contrast',
                       backfaceVisibility: 'hidden'
                   }}
                    />
