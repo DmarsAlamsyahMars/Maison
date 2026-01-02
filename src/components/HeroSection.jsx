@@ -75,34 +75,48 @@ const HeroSection = () => {
     }, (context) => {
       let { isMobile } = context.conditions;
 
-      // ADJUSTED SCALES: Less aggressive scaling on mobile to reduce pixel calculation load
       const startScale = isMobile ? 2.9 : 2.5;
       const endScale = isMobile ? 0.4 : 0.7;
 
-      gsap.set(sceneWrapperRef.current, { scale: startScale, transformOrigin: "center center" });
+      // 1. SETUP INITIAL SCENE
+      // We force3D to true to engage the GPU compositor immediately
+      gsap.set(sceneWrapperRef.current, { 
+        scale: startScale, 
+        transformOrigin: "center center", 
+        force3D: true 
+      });
       
-      // --- ROBUST POSITIONING FIX ---
       gsap.set([leftTextRef.current, rightTextRef.current], { autoAlpha: 0 });
 
       if (isMobile) {
-          // MOBILE
           gsap.set(leftTextRef.current, { xPercent: -50, y: -30 });  
           gsap.set(rightTextRef.current, { xPercent: -50, y: 30 });  
       } else {
-          // DESKTOP
           gsap.set(leftTextRef.current, { x: -50, yPercent: -50 });
           gsap.set(rightTextRef.current, { x: 50, yPercent: -50 });
       }
 
+      // 2. ANIMATE CHERUBS (Directly via GSAP, no CSS Vars)
       const cherubs = cherubLayerRef.current.children;
-      gsap.set(cherubs, { '--intensity': 1, '--rotate': 0, '--floatX': 0, '--floatY': 0 });
-
+      
       Array.from(cherubs).forEach((cherub, i) => {
         const config = cherubConfig[i];
+        
+        // Set Initial Position based on Responsive Config
+        gsap.set(cherub, {
+            top: isMobile ? config.mobileTop : config.top,
+            left: isMobile ? config.mobileLeft : config.left,
+            x: 0,
+            y: 0,
+            rotation: 0,
+            force3D: true // Hardware acceleration
+        });
+
+        // The Floating Animation
         gsap.to(cherub, {
-            '--floatY': config.floatY,
-            '--floatX': config.floatX,
-            '--rotate': config.rotate,
+            y: config.floatY,
+            x: config.floatX,
+            rotation: config.rotate,
             duration: config.duration,
             ease: "sine.inOut",
             yoyo: true,
@@ -111,22 +125,25 @@ const HeroSection = () => {
         });
       });
 
+      // 3. SCROLL TIMELINE
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
           end: "+=300%", 
-          scrub: 1, 
+          scrub: 0.5, // Adds a 0.5s lag to smooth out scroll jitter
           pin: true,
-          anticipatePin: 1
+          // anticipatePin: 1 // Removed as it sometimes causes jitter on simple pins
         }
       });
 
       tl.addLabel("start");
       tl.to(sceneWrapperRef.current, { scale: endScale, duration: 2, ease: "power1.inOut" }, "start");
       tl.to(fadeLayerRef.current, { opacity: 0, duration: 1.5, ease: "power1.in" }, "start");
-      tl.to(cherubs, { '--intensity': 0, duration: 2, ease: "power1.inOut" }, "start");
       
+      // We removed the 'intensity' animation because scaling down the container 
+      // naturally dampens the movement visually, saving calculation cost.
+
       // ANIMATE TEXT IN
       tl.to([leftTextRef.current, rightTextRef.current], { 
           autoAlpha: 1, 
@@ -142,7 +159,10 @@ const HeroSection = () => {
 
     }, containerRef);
 
-    return () => mm.revert();
+    return () => {
+        mm.revert();
+        window.removeEventListener('resize', setViewportHeightVar);
+    };
   }, []);
 
   return (
@@ -151,25 +171,6 @@ const HeroSection = () => {
       className="relative min-h-[100dvh] bg-transparent overflow-hidden"
       style={{ height: 'calc(var(--vh, 1vh) * 100)' }}
     >
-      <style>{`
-        .living-cherub {
-            --floatX: 0px;
-            --floatY: 0px;
-            --rotate: 0deg;
-            --intensity: 1; 
-            top: var(--mob-top);
-            left: var(--mob-left);
-            transform: translate3d(calc(var(--floatX) * var(--intensity)), calc(var(--floatY) * var(--intensity)), 0) rotate(calc(var(--rotate) * var(--intensity)));
-            will-change: transform; 
-        }
-        @media (min-width: 768px) {
-            .living-cherub {
-                top: var(--desk-top);
-                left: var(--desk-left);
-            }
-        }
-      `}</style>
-
       <div className="absolute inset-0 bg-transparent">
         <div className="absolute inset-0 opacity-5">
            <div className="w-full h-full bg-gradient-to-br from-transparent via-stone-300/10 to-transparent"></div>
@@ -181,10 +182,7 @@ const HeroSection = () => {
         ref={leftTextRef} 
         className="
             absolute z-30 pointer-events-none 
-            /* MOBILE: Top + Centered horizontally */
             top-[15%] left-1/2 text-center w-64
-            
-            /* DESKTOP: Centered Vertically + Left positioned */
             md:top-1/2 md:translate-x-0 md:left-[5%] md:right-auto md:w-80 md:text-left
         "
       >
@@ -199,10 +197,7 @@ const HeroSection = () => {
         ref={rightTextRef} 
         className="
             absolute z-30 pointer-events-none 
-            /* MOBILE: Bottom + Centered horizontally */
             bottom-[15%] left-1/2 text-center w-64
-            
-            /* DESKTOP: Centered Vertically + Right positioned */
             md:bottom-auto md:top-1/2 md:translate-x-0 md:left-auto md:right-[5%] md:w-80 md:text-right
         "
       >
@@ -213,7 +208,8 @@ const HeroSection = () => {
       </div>
 
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <div ref={sceneWrapperRef} className="relative w-[900px] h-[600px]">
+        {/* Added will-change-transform to hint the browser to promote this layer */}
+        <div ref={sceneWrapperRef} className="relative w-[900px] h-[600px] will-change-transform">
             
             <div className="absolute inset-0 z-0">
                 <div 
@@ -232,25 +228,17 @@ const HeroSection = () => {
                         key={cherub.id}
                         src={cherub.src}
                         alt="Cherub"
-                        // Added 'gpu-optimize' class here (defined in global.css)
-                        className={`living-cherub gpu-optimize absolute opacity-90 drop-shadow-lg ${cherub.width}`}
+                        className={`absolute opacity-90 drop-shadow-lg ${cherub.width}`}
+                        // Note: top/left are now handled purely by GSAP in the useEffect
                         style={{ 
-                            '--mob-top': cherub.mobileTop,
-                            '--mob-left': cherub.mobileLeft,
-                            '--desk-top': cherub.top, 
-                            '--desk-left': cherub.left,
                             filter: 'contrast(0.9) sepia(0.2)',
+                            // Removed CSS Variables for performance
                         }}
                     />
                 ))}
             </div>
 
             <div ref={fadeLayerRef} className="absolute inset-0 z-40 pointer-events-none will-change-opacity">
-                
-                {/* PERFORMANCE FIX: 
-                   'hidden md:block' ensures Sparkles component is NEVER rendered on mobile.
-                   This saves massive battery/GPU on phones.
-                */}
                 <div className="hidden md:block absolute inset-0">
                     <Sparkles count={60} speed={0.3} />
                 </div>
@@ -261,16 +249,12 @@ const HeroSection = () => {
                   alt="Maison des Rêves" 
                   className="w-32 md:w-full md:max-w-xs mx-auto drop-shadow-2xl"
                   style={{ 
-        // 3. FORCE the browser to keep edges sharp, even when scaling
-                  imageRendering: '-webkit-optimize-contrast',
-                  transform: 'translateZ(0)', // Double-check GPU trigger
-                  backfaceVisibility: 'hidden'
-                    }}
+                      imageRendering: '-webkit-optimize-contrast',
+                      backfaceVisibility: 'hidden'
+                  }}
                    />
                 </div>
-
             </div>
-
         </div>
       </div>
     </section>
